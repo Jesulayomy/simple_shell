@@ -4,24 +4,8 @@
 
 ### Libraries :scroll:
 - stdio.h
-- math.h
+- stdlib.h
 - [main.h](main.h)
-
---------------------------------------------------------------------------------
-
-## :octocat: Undocumented Features :octocat:
-![feature](feature.jpeg)
-	>- Repetition in while loop
-	(scanf, printf, last else statements){resolved}
-
-```commandline
-- Collect input(done), 
-- Loop the exit and options(done, has extra features). 
-- Also find a way to collect and store two return values (pending)
-- Add last result (done, doesnt work for quadratic and simultaneous equations yet)
-- x.sh for compiling faster
-- Github actions
-```
 
 --------------------------------------------------------------------------------
 
