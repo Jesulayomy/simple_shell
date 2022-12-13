@@ -16,6 +16,12 @@ char **get_commands(char *buffer, size_t n)
 	ssize_t i, r;
 
 	r = my_getline(&buffer, &n, stdin);
+	if (r == -1)
+	{
+		free(buffer);
+		return (arr);
+	}
+
 	for (i = 0; i < r; i++)
 	{
 		if (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\t')

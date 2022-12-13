@@ -35,6 +35,36 @@ int my_exit(com_mand params)
 	arr[0] = strdup(params.arr[0]);
 	arr[1] = strdup(params.arr[1]);
 	arr[2] = NULL;
+	char **brr = NULL;
+	char *token;
+	char *input = malloc(sizeof(char) * BUFSIZE);
+	int jh, i;
+
+	jh = read(STDIN_FILENO, input, BUFSIZE);
+	if (jh > 0)
+	{
+		brr = malloc(sizeof(char *) * (5));
+		token = my_strtok(input, DELIM_T);
+		i = 0;
+		while (token != NULL)
+		{
+			brr[i] = malloc(sizeof(char) * (my_strlen(token) + 1));
+			my_strcpy(arr[i], token);
+			token = my_strtok(NULL, DELIM_T);
+			i++;
+		}
+		brr[i] = NULL;
+
+		stat = execve(brr[0], brr, env);
+		if (stat == -1)
+		{
+			printf("%s: No such file or directory\n", av[0]);
+			free_arr2(brr);
+			exit(98);
+		}
+		free_arr2(brr);
+		return (0);
+	}
 	if (params.arr[2])
 	{
 		printf("%s: too many arguments\n", arr[0]);

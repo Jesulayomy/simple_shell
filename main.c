@@ -49,11 +49,17 @@ void loop_shell(char **av, char **env, char **arr, pid_t child, int stat, char *
 	{
 		printf("($) ");
 		fflush(stdout);
+		arr = get_commands(line, len);
+		if (arr == NULL)
+		{
+			free_arr2(arr);
+			exit (0);
+		}
+
 		child = fork();
 
 		if (child == 0)
 		{
-			arr = get_commands(line, len);
 			stat = execve(arr[0], arr, env);
 			if (stat == -1)
 			{
@@ -65,6 +71,7 @@ void loop_shell(char **av, char **env, char **arr, pid_t child, int stat, char *
 		}
 		else
 		{
+			free_arr2(arr);
 			wait(NULL);
 		}
 	}
@@ -82,12 +89,30 @@ int main(int ac, char *av[], char *env[])
 {
 	char *line = NULL;
 	size_t len = 0;
-	pid_t child = NULL;
+	pid_t child = getpid();
 	int stat = 0;
 	char **arr = NULL;
 
 	(void) ac;
+
+	/*
+	   arr = get_commands(line, len);
+	   if (arr != NULL)
+	   {
+	   stat = execve(arr[0], arr, env);
+	   if (stat == -1)
+	   {
+	   printf("%s: No such file or directory\n", av[0]);
+	   free_arr2(arr);
+	   exit(98);
+	   }
+	   free_arr2(arr);
+	   return (0);
+	   }
+	 */
+
 	loop_shell(av, env, arr, child, stat, line, len);
 
+	free_arr2(arr);
 	return (0);
 }
