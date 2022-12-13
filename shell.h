@@ -38,10 +38,16 @@ typedef struct path
  * @next: next
  *
  */
-typedef struct com_mand
+typedef struct data
 {
+	pid_t pid;
 	char **arr;
-} com_mand;
+	char **_environ;
+	char **av;
+	int status;
+	char *line;
+	size_t length;
+} sh_data;
 
 /**
  * struct built_in - path variable
@@ -52,7 +58,7 @@ typedef struct com_mand
 typedef struct built_in
 {
 	char *str;
-	int (*func)(com_mand);
+	int (*func)(sh_data *shell);
 } built_in;
 
 
@@ -65,9 +71,12 @@ char *my_strcpy(char *, char *);
 char *my_strdup(char *);
 char *my_strtok(char *, const char *);
 int my_isdigit(char *);
-int (*get_func(char *))(com_mand);
+int (*get_func(char **))(sh_data *shell);
+int my_atoi(char *s);
 int my_strcmp(char *, char *);
 int my_strlen(char *);
+int my_exit(sh_data *shell);
+int my_env(sh_data *shell);
 path_l *add_node_end(path_l **, const char *);
 path_l *path_to_list(void);
 size_t print_list(const path_l *);
