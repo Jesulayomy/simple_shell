@@ -1,6 +1,5 @@
 #include "shell.h"
 
-
 /**
  * insert_line - inserts the buffer into the lineptr
  * @lineptr: the address passed into getline(char **buffer)

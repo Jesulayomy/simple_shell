@@ -13,9 +13,9 @@ int (*get_func(char **arr))(sh_data *)
 		{"env", my_env},
 		/*
 		 * {"setenv", my_set},
-		{"unsetenv", my_unset},
-		{"cd", my_cd}
-		*/
+		 {"unsetenv", my_unset},
+		 {"cd", my_cd}
+		 */
 		{NULL, NULL}
 	};
 
@@ -47,39 +47,24 @@ int (*get_func(char **arr))(sh_data *)
  */
 void loop_shell(sh_data *shell)
 {
-	int (*built_in_func)(sh_data *sh);
+	char *path;
 
 	for (; ;)
 	{
 		printf("($) ");
 		fflush(stdout);
-		shell->arr = get_commands(shell->line, shell->length);
-
-		if (!shell->arr)
-		{
-			free_arr2(shell->arr);
-			exit(0);
-		}
-		built_in_func = get_func(shell->arr);
-
-		if (built_in_func != NULL)
-		{
-			built_in_func(shell);
+		path = check_shell(shell);
+		if (!path)
 			continue;
-		}
 
 		shell->pid = fork();
-
 		if (shell->pid == 0)
 		{
-			shell->status = execve(shell->arr[0], shell->arr, shell->_environ);
+			shell->status = execve(path, shell->arr, shell->_environ);
 			if (shell->status == -1)
-			{
-				printf("%s: No such file or directory\n", shell->av[0]);
-				free_arr2(shell->arr);
 				exit(98);
-			}
 			free_arr2(shell->arr);
+			free(path);
 		}
 		else
 		{
@@ -87,6 +72,41 @@ void loop_shell(sh_data *shell)
 		}
 	}
 }
+
+/**
+ * check_shell - checks the shell commands, paths and builtin
+ * @shell: pointer to shell structure
+ *
+ * Return: path or NULL
+ */
+char *check_shell(sh_data *shell)
+{
+	int (*built_in_func)(sh_data *sh);
+	char *path;
+
+	shell->arr = get_commands(shell->line, shell->length);
+	if (!shell->arr)
+	{
+		free_arr2(shell->arr);
+		exit(0);
+	}
+	built_in_func = get_func(shell->arr);
+	if (built_in_func != NULL)
+	{
+		built_in_func(shell);
+		return (NULL);
+	}
+	path = search_path(shell->path, shell->arr[0]);
+	if (!path)
+	{
+		printf("%s: No such file or directory\n", shell->av[0]);
+		free_arr2(shell->arr);
+		free(path);
+		return (NULL);
+	}
+	return (path);
+}
+
 
 /**
  * main - main body of the shell
@@ -108,6 +128,7 @@ int main(int ac, char *av[], char *env[])
 	shell.status = 0;
 	shell.arr = NULL;
 	shell.av = av;
+	shell.path = path_to_list(env);
 
 	for (i = 0; env[i]; i++)
 		;

@@ -280,7 +280,7 @@ void reverse_str(char *string)
 }
 
 /**
- * my _atoi - converts a string to an integer.
+ * my_atoi - converts a string to an integer.
  * @s: input string.
  *
  * Return: integer.

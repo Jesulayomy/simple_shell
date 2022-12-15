@@ -4,7 +4,7 @@ clear
 
 echo "Compiling . . ."
 
-gcc -Wall -Werror -Wextra -pedantic -std=gnu89 add_node.c  get_commands.c  _getline.c util_funcs.c main.c -o testexec
+gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *c -o testexec
 
 # tests_rss/test.c
 

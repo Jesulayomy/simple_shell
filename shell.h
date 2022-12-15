@@ -46,6 +46,7 @@ typedef struct data
 	char **av;
 	int status;
 	char *line;
+	path_l *path;
 	size_t length;
 } sh_data;
 
@@ -70,6 +71,8 @@ char *my_strcat(char *, char *);
 char *my_strcpy(char *, char *);
 char *my_strdup(char *);
 char *my_strtok(char *, const char *);
+char *search_path(path_l *list, char *file);
+char *check_shell(sh_data *shell);
 int my_isdigit(char *);
 int (*get_func(char **))(sh_data *shell);
 int my_atoi(char *s);
@@ -78,7 +81,7 @@ int my_strlen(char *);
 int my_exit(sh_data *shell);
 int my_env(sh_data *shell);
 path_l *add_node_end(path_l **, const char *);
-path_l *path_to_list(void);
+path_l *path_to_list(char **);
 size_t print_list(const path_l *);
 ssize_t my_getline(char **, size_t *, FILE *);
 void *my_memchr(register const void *, int, size_t);
