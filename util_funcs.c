@@ -313,3 +313,29 @@ int my_atoi(char *s)
 	}
 	return (oi * pn);
 }
+
+/**
+ * mod_env - adds or modifies and environment variable
+ * @shell: shell data
+ *
+ * Return: varaible with value
+ */
+char *mod_env(sh_data *shell)
+{
+	char *str;
+	int len1;
+	int len2;
+
+	len1 = my_strlen(shell->arr[1]);
+	len2 = my_strlen(shell->arr[2]);
+
+	str = malloc(sizeof(char) * (len1 + len2 + 2));
+	if (!str)
+		return (NULL);
+
+	my_strcpy(str, shell->arr[1]);
+	my_strcat(str, "=");
+	my_strcat(str, shell->arr[2]);
+
+	return (str);
+}

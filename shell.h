@@ -24,7 +24,6 @@ extern char **environ;
  * struct path - path variable
  * @str: string
  * @next: next
- *
  */
 typedef struct path
 {
@@ -33,10 +32,15 @@ typedef struct path
 } path_l;
 
 /**
- * struct com_mand - structure containing command argument types
- * @str: string
- * @next: next
- *
+ * struct data - structure containing shell data
+ * @pid: process id
+ * @arr: array of arguments
+ * @_environ: the shell environment
+ * @av: arguments vector
+ * @status: shell status
+ * @line: line of commands
+ * @path: linked list of paths
+ * @length: length
  */
 typedef struct data
 {
@@ -51,10 +55,9 @@ typedef struct data
 } sh_data;
 
 /**
- * struct built_in - path variable
+ * struct built_in - structure for builtin functions
  * @str: string
- * @next: next
- *
+ * @func: pointer to function
  */
 typedef struct built_in
 {
@@ -64,20 +67,23 @@ typedef struct built_in
 
 char **get_commands(char *, size_t);
 char *_getenv(const char *);
+char *mod_env(sh_data *);
 char *check_shell(sh_data *);
 char *my_strcat(char *, char *);
 char *my_strcpy(char *, char *);
 char *my_strdup(char *);
 char *my_strtok(char *, const char *);
-char *search_path(path_l *list, char *file);
+char *search_path(path_l *, char *);
 int (*get_func(char **))(sh_data *);
 int my_atoi(char *s);
-int my_env(sh_data *shell);
-int my_exit(sh_data *shell);
+int my_env(sh_data *);
+int my_exit(sh_data *);
+int my_set(sh_data *);
+int my_unset(sh_data *);
 int my_isdigit(char *);
 int my_strcmp(char *, char *);
 int my_strlen(char *);
-path_l *add_node_end(path_l **, const char *);
+path_l *add_node_end(path_l **, char *);
 path_l *path_to_list(char **);
 size_t print_list(const path_l *);
 ssize_t my_getline(char **, size_t *, FILE *);

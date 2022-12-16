@@ -7,7 +7,7 @@
  *
  * Return: address of new list
  */
-path_l *add_node_end(path_l **head, const char *str)
+path_l *add_node_end(path_l **head, char *str)
 {
 	path_l *list, *temp;
 
@@ -17,7 +17,7 @@ path_l *add_node_end(path_l **head, const char *str)
 	if (!list)
 		return (NULL);
 
-	list->str = strdup(str);
+	list->str = my_strdup(str);
 	list->next = NULL;
 
 	if (!temp)
@@ -31,7 +31,6 @@ path_l *add_node_end(path_l **head, const char *str)
 		temp->next = list;
 	}
 
-	
 	return (*head);
 }
 
@@ -124,8 +123,8 @@ char *search_path(path_l *list, char *file)
 }
 
 /**
- * free_list - frees a linked list
- * @head: the starting func
+ * free_list - frees the path_l linked list
+ * @head: pointer to the list
  *
  * Return: non
  */

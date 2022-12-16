@@ -11,10 +11,10 @@ int (*get_func(char **arr))(sh_data *)
 	built_in sh[] = {
 		{"exit", my_exit},
 		{"env", my_env},
-		/*
-		 * {"setenv", my_set},
-		 {"unsetenv", my_unset},
-		 {"cd", my_cd}
+		{"setenv", my_set},
+		{"unsetenv", my_unset},
+		/**
+		 * {"cd", my_cd}
 		 */
 		{NULL, NULL}
 	};
@@ -95,6 +95,7 @@ char *check_shell(sh_data *shell)
 	if (built_in_func != NULL)
 	{
 		built_in_func(shell);
+		free_arr2(shell->arr);
 		return (NULL);
 	}
 	path = search_path(shell->path, shell->arr[0]);
