@@ -66,7 +66,7 @@ typedef struct built_in
 } built_in;
 
 char **get_commands(char *, size_t);
-char *_getenv(const char *);
+char *_getenv(sh_data *, char *);
 char *mod_env(sh_data *);
 char *check_shell(sh_data *);
 char *my_strcat(char *, char *);
@@ -75,7 +75,8 @@ char *my_strdup(char *);
 char *my_strtok(char *, const char *);
 char *search_path(path_l *, char *);
 int (*get_func(char **))(sh_data *);
-int my_atoi(char *s);
+int my_atoi(char *);
+int my_cd(sh_data *);
 int my_env(sh_data *);
 int my_exit(sh_data *);
 int my_set(sh_data *);

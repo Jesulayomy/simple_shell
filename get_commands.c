@@ -11,7 +11,6 @@ char **get_commands(char *buffer, size_t n)
 {
 	char **arr = NULL;
 	char *token;
-	/* char delim[6] = " \t\r\a\n"; */
 	size_t k = 0;
 	ssize_t i, r;
 

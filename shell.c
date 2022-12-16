@@ -13,9 +13,7 @@ int (*get_func(char **arr))(sh_data *)
 		{"env", my_env},
 		{"setenv", my_set},
 		{"unsetenv", my_unset},
-		/**
-		 * {"cd", my_cd}
-		 */
+		{"cd", my_cd},
 		{NULL, NULL}
 	};
 
@@ -62,7 +60,15 @@ void loop_shell(sh_data *shell)
 		{
 			shell->status = execve(path, shell->arr, shell->_environ);
 			if (shell->status == -1)
+			{
+				printf("%s: Permission denied\n", shell->arr[0]);
+				free_list(shell->path);
+				free_arr2(shell->_environ);
+				free_arr2(shell->arr);
+				free(shell->line);
+				free(path);
 				exit(98);
+			}
 		}
 		else
 		{

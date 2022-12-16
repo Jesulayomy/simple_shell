@@ -1,6 +1,65 @@
 #include "shell.h"
 
 /**
+ * my_cd - exits the shell
+ * @shell: shell data
+ *
+ * Return: an exit value
+ */
+int my_cd(sh_data *shell)
+{
+	int m, n = 0;
+	char *new_pwd;
+	char *old_pwd = _getenv(shell, "PWD");
+
+	if (shell->arr[1] == NULL)
+	{
+		free_arr2(shell->arr);
+		shell->arr = malloc(sizeof(char *) * 3);
+		shell->arr[0] = my_strdup("cd");
+		shell->arr[1] = _getenv(shell, "HOME");
+		shell->arr[2] = NULL;
+	}
+	else if (my_strcmp(shell->arr[1], "-") == 0)
+	{
+		free(shell->arr[1]);
+		shell->arr[1] = _getenv(shell, "OLDPWD");
+		n++;
+	}
+
+	m = chdir(shell->arr[1]);
+	if (m == -1)
+		printf("%s: %s: No such file or directory\n", shell->arr[0], shell->arr[1]);
+	if (n == 1)
+	{
+		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
+		write(STDOUT_FILENO, "\n", 1);
+	}
+
+	new_pwd = getcwd(NULL, 1024);
+
+	free_arr2(shell->arr);
+	shell->arr = malloc(sizeof(char *) * 4);
+	shell->arr[0] = my_strdup("setenv");
+	shell->arr[1] = my_strdup("PWD");
+	shell->arr[2] = my_strdup(new_pwd);
+	shell->arr[3] = NULL;
+	my_set(shell);
+
+	free_arr2(shell->arr);
+	shell->arr = malloc(sizeof(char *) * 4);
+	shell->arr[0] = my_strdup("setenv");
+	shell->arr[1] = my_strdup("OLDPWD");
+	shell->arr[2] = my_strdup(old_pwd);
+	shell->arr[3] = NULL;
+	my_set(shell);
+
+	free(new_pwd);
+	free(old_pwd);
+	return (0);
+}
+
+/**
  * my_exit - exits the shell
  * @shell: shell data
  *
