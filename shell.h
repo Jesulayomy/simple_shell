@@ -59,38 +59,35 @@ typedef struct data
 typedef struct built_in
 {
 	char *str;
-	int (*func)(sh_data *shell);
+	int (*func)(sh_data *);
 } built_in;
-
-
-
 
 char **get_commands(char *, size_t);
 char *_getenv(const char *);
+char *check_shell(sh_data *);
 char *my_strcat(char *, char *);
 char *my_strcpy(char *, char *);
 char *my_strdup(char *);
 char *my_strtok(char *, const char *);
 char *search_path(path_l *list, char *file);
-char *check_shell(sh_data *shell);
-int my_isdigit(char *);
-int (*get_func(char **))(sh_data *shell);
+int (*get_func(char **))(sh_data *);
 int my_atoi(char *s);
+int my_env(sh_data *shell);
+int my_exit(sh_data *shell);
+int my_isdigit(char *);
 int my_strcmp(char *, char *);
 int my_strlen(char *);
-int my_exit(sh_data *shell);
-int my_env(sh_data *shell);
 path_l *add_node_end(path_l **, const char *);
 path_l *path_to_list(char **);
 size_t print_list(const path_l *);
 ssize_t my_getline(char **, size_t *, FILE *);
 void *my_memchr(register const void *, int, size_t);
+void *my_realloc(void *, unsigned int, unsigned int);
 void free_arr2(char **);
 void free_list(path_l *);
 void get_signal(int);
 void insert_line(char **, size_t *n, char *, size_t);
 void my_memcpy(void *, const void *, unsigned int);
-void *my_realloc(void *, unsigned int, unsigned int);
 void print_path_dir(void);
 void reverse_str(char *);
 

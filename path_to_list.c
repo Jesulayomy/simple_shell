@@ -1,6 +1,5 @@
 #include "shell.h"
 
-
 /**
  * add_node_end - adds a new node at the end of the list_t list
  * @head: pointer to list
@@ -32,6 +31,7 @@ path_l *add_node_end(path_l **head, const char *str)
 		temp->next = list;
 	}
 
+	
 	return (*head);
 }
 
@@ -99,20 +99,51 @@ char *search_path(path_l *list, char *file)
 	char *path;
 	struct stat s;
 
-	if (file[0] == '/')
-		return (file);
 	while (temp)
 	{
 		path = malloc(sizeof(char) * (my_strlen(temp->str) + my_strlen(file) + 2));
+
+		if (file[0] == '/')
+		{
+			free(path);
+			path = my_strdup(file);
+			return (path);
+		}
+
 		my_strcpy(path, temp->str);
 		my_strcat(path, "/");
 		my_strcat(path, file);
 		if (stat(path, &s) == 0)
 			return (path);
 
+		free(path);
 		temp = temp->next;
 	}
+
 	return (NULL);
 }
 
+/**
+ * free_list - frees a linked list
+ * @head: the starting func
+ *
+ * Return: non
+ */
+void free_list(path_l *head)
+{
+	path_l *temp = head, *second;
 
+	if (head)
+	{
+		while (temp->next)
+		{
+			second = temp;
+			temp = temp->next;
+			free(second->str);
+			free(second);
+		}
+
+		free(temp->str);
+		free(temp);
+	}
+}

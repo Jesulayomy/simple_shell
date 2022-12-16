@@ -13,8 +13,10 @@ int my_exit(sh_data *shell)
 	if (shell->arr[1])
 		status = my_atoi(shell->arr[1]);
 
+	free_list(shell->path);
 	free_arr2(shell->_environ);
 	free_arr2(shell->arr);
+	free(shell->line);
 	exit(status);
 }
 

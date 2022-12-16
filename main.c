@@ -63,13 +63,14 @@ void loop_shell(sh_data *shell)
 			shell->status = execve(path, shell->arr, shell->_environ);
 			if (shell->status == -1)
 				exit(98);
-			free_arr2(shell->arr);
-			free(path);
 		}
 		else
 		{
 			wait(NULL);
 		}
+
+		free_arr2(shell->arr);
+		free(path);
 	}
 }
 
@@ -106,7 +107,6 @@ char *check_shell(sh_data *shell)
 	}
 	return (path);
 }
-
 
 /**
  * main - main body of the shell

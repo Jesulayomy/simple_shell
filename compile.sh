@@ -4,7 +4,7 @@ clear
 
 echo "Compiling . . ."
 
-gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *c -o testexec
+gcc -Wall -Werror -Wextra -pedantic -std=gnu89 *c -o hsh
 
 # tests_rss/test.c
 
@@ -18,4 +18,4 @@ fi
 
 echo -e "Running testexec with valgrind . . .\n"
 
-valgrind --show-leak-kinds=all --tool=memcheck --leak-check=full --track-origins=yes ./testexec
+valgrind --show-leak-kinds=all --tool=memcheck --leak-check=full --track-origins=yes ./hsh
