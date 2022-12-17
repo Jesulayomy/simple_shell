@@ -94,8 +94,8 @@ char *check_shell(sh_data *shell)
 	shell->arr = get_commands(shell->line, shell->length);
 	if (!shell->arr)
 	{
-		free_arr2(shell->arr);
-		exit(0);
+		free(shell->line);
+		return (NULL);
 	}
 	built_in_func = get_func(shell->arr);
 	if (built_in_func != NULL)

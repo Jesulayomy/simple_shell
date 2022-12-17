@@ -84,6 +84,7 @@ int my_unset(sh_data *);
 int my_isdigit(char *);
 int my_strcmp(char *, char *);
 int my_strlen(char *);
+int rm_comments(char **);
 path_l *add_node_end(path_l **, char *);
 path_l *path_to_list(char **);
 size_t print_list(const path_l *);
