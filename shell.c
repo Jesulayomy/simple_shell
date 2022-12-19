@@ -14,6 +14,7 @@ int (*get_func(char **arr))(sh_data *)
 		{"setenv", my_set},
 		{"unsetenv", my_unset},
 		{"cd", my_cd},
+		{"alias", my_alias},
 		{NULL, NULL}
 	};
 
@@ -97,6 +98,7 @@ char *check_shell(sh_data *shell)
 		free(shell->line);
 		return (NULL);
 	}
+	check_alias(shell);
 	built_in_func = get_func(shell->arr);
 	if (built_in_func != NULL)
 	{
@@ -136,6 +138,7 @@ int main(int ac, char *av[], char *env[])
 	shell.arr = NULL;
 	shell.av = av;
 	shell.path = path_to_list(env);
+	shell.alias = NULL;
 
 	for (i = 0; env[i]; i++)
 		;

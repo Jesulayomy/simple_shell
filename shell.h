@@ -21,7 +21,7 @@
 extern char **environ;
 
 /**
- * struct path - path variable
+ * struct path - linked list to path variable
  * @str: string
  * @next: next
  */
@@ -32,6 +32,19 @@ typedef struct path
 } path_l;
 
 /**
+ * struct alias - linked list to aliases
+ * @name: name of alias
+ * @value: value of alias
+ * @next: next
+ */
+typedef struct alias
+{
+	char *name;
+	char *value;
+	struct alias *next;
+} alias_l;
+
+/**
  * struct data - structure containing shell data
  * @pid: process id
  * @arr: array of arguments
@@ -40,6 +53,7 @@ typedef struct path
  * @status: shell status
  * @line: line of commands
  * @path: linked list of paths
+ * @alias: linked list of aliases
  * @length: length
  */
 typedef struct data
@@ -51,6 +65,7 @@ typedef struct data
 	int status;
 	char *line;
 	path_l *path;
+	alias_l *alias;
 	size_t length;
 } sh_data;
 
@@ -68,6 +83,7 @@ typedef struct built_in
 char **get_commands(char *, size_t);
 char *_getenv(sh_data *, char *);
 char *mod_env(sh_data *);
+void mod_dir (sh_data *, char *, char *);
 char *check_shell(sh_data *);
 char *my_strcat(char *, char *);
 char *my_strcpy(char *, char *);
@@ -81,6 +97,13 @@ int my_env(sh_data *);
 int my_exit(sh_data *);
 int my_set(sh_data *);
 int my_unset(sh_data *);
+int my_alias(sh_data *);
+int set_alias(sh_data *, char *);
+int print_all_alias(sh_data *);
+int print_alias(sh_data *, char *);
+alias_l *add_alias(alias_l **, char *, char *);
+void check_alias(sh_data *);
+void free_aliases(alias_l *);
 int my_isdigit(char *);
 int my_strcmp(char *, char *);
 int my_strlen(char *);

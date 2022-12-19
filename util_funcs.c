@@ -339,3 +339,28 @@ char *mod_env(sh_data *shell)
 
 	return (str);
 }
+
+/**
+ * mod_dir - modifies a directory
+ * @shell: pointer to shell
+ * @dir: directory to set
+ * @newdir: new directory
+ *
+ * Return: void
+ */
+void mod_dir(sh_data *shell, char *dir, char *newdir)
+{
+	free_arr2(shell->arr);
+	shell->arr = malloc(sizeof(char *) * 4);
+	shell->arr[0] = my_strdup("setenv");
+
+	if (my_strcmp(dir, "old") == 0)
+		shell->arr[1] = my_strdup("OLDPWD");
+	else if (my_strcmp(dir, "new") == 0)
+		shell->arr[1] = my_strdup("PWD");
+
+	shell->arr[2] = my_strdup(newdir);
+	shell->arr[3] = NULL;
+
+	my_set(shell);
+}

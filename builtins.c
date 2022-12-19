@@ -29,7 +29,10 @@ int my_cd(sh_data *shell)
 
 	m = chdir(shell->arr[1]);
 	if (m == -1)
-		printf("%s: %s: No such file or directory\n", shell->arr[0], shell->arr[1]);
+	{
+		write(STDERR_FILENO, "No such file or directory\n", 27);
+		return (0);
+	}
 	if (n == 1)
 	{
 		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
@@ -38,21 +41,8 @@ int my_cd(sh_data *shell)
 
 	new_pwd = getcwd(NULL, 1024);
 
-	free_arr2(shell->arr);
-	shell->arr = malloc(sizeof(char *) * 4);
-	shell->arr[0] = my_strdup("setenv");
-	shell->arr[1] = my_strdup("PWD");
-	shell->arr[2] = my_strdup(new_pwd);
-	shell->arr[3] = NULL;
-	my_set(shell);
-
-	free_arr2(shell->arr);
-	shell->arr = malloc(sizeof(char *) * 4);
-	shell->arr[0] = my_strdup("setenv");
-	shell->arr[1] = my_strdup("OLDPWD");
-	shell->arr[2] = my_strdup(old_pwd);
-	shell->arr[3] = NULL;
-	my_set(shell);
+	mod_dir(shell, "new", new_pwd);
+	mod_dir(shell, "old", old_pwd);
 
 	free(new_pwd);
 	free(old_pwd);
@@ -73,6 +63,8 @@ int my_exit(sh_data *shell)
 		status = my_atoi(shell->arr[1]);
 
 	free_list(shell->path);
+	if (shell->alias)
+		free_aliases(shell->alias);
 	free_arr2(shell->_environ);
 	free_arr2(shell->arr);
 	free(shell->line);
