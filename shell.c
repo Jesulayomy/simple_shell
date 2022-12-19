@@ -62,9 +62,7 @@ void loop_shell(sh_data *shell)
 			shell->status = execve(path, shell->arr, shell->_environ);
 			if (shell->status == -1)
 			{
-				printf("%s: Permission denied\n", shell->arr[0]);
-				free_list(shell->path);
-				free_arr2(shell->_environ);
+				write(STDERR_FILENO, ": Permission denied\n", 20);
 				free_arr2(shell->arr);
 				free(shell->line);
 				free(path);
@@ -73,6 +71,7 @@ void loop_shell(sh_data *shell)
 		}
 		else
 		{
+			shell->status = 0;
 			wait(NULL);
 		}
 
@@ -98,7 +97,10 @@ char *check_shell(sh_data *shell)
 		free(shell->line);
 		return (NULL);
 	}
+
 	check_alias(shell);
+	expand_var(shell);
+
 	built_in_func = get_func(shell->arr);
 	if (built_in_func != NULL)
 	{
@@ -115,6 +117,53 @@ char *check_shell(sh_data *shell)
 		return (NULL);
 	}
 	return (path);
+}
+
+/**
+ * expand_var - expands a variable to its corresponding value
+ * @shell: pointer to shell structure
+ *
+ * Return: void
+ */
+void expand_var(sh_data *shell)
+{
+	int i, j, k;
+	char *str, *value;
+
+	for (i = 0; shell->arr[i]; i++)
+	{
+		if (my_strcmp(shell->arr[i], "$$") == 0)
+		{
+			free(shell->arr[i]);
+			str = my_itoa(shell->pid);
+			shell->arr[i] = my_strdup(str);
+			free(str);
+		}
+		else if (my_strcmp(shell->arr[i], "$?") == 0)
+		{
+			free(shell->arr[i]);
+			str = my_itoa(shell->status);
+			shell->arr[i] = my_strdup(str);
+			free(str);
+		}
+		else if (shell->arr[i][0] == '$')
+		{
+			str = malloc(sizeof(char) * my_strlen(shell->arr[i]));
+
+			for (j = 1, k = 0; shell->arr[i][j]; j++, k++)
+				str[k] = shell->arr[i][j];
+			str[k] = '\0';
+
+			value = _getenv(shell, str);
+
+			free(shell->arr[i]);
+			free(str);
+
+			shell->arr[i] = my_strdup(value);
+
+			free(value);
+		}
+	}
 }
 
 /**

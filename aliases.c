@@ -53,6 +53,7 @@ int set_alias(sh_data *shell, char *arg)
 
 	add_alias(&shell->alias, name, value);
 	free(str);
+	shell->status = 0;
 
 	return (0);
 }
@@ -71,8 +72,9 @@ int print_all_alias(sh_data *shell)
 
 	if (!temp)
 	{
-		write(STDOUT_FILENO, "No aliases found\n", 17);
-		return (0);
+		write(STDERR_FILENO, "No aliases found\n", 17);
+		shell->status = 1;
+		return (1);
 	}
 	while (temp)
 	{
@@ -80,7 +82,10 @@ int print_all_alias(sh_data *shell)
 		len2 = my_strlen(temp->value);
 		alias = malloc(sizeof(char) * (len1 + len2 + 2));
 		if (!alias)
-			return (-1);
+		{
+			shell->status = 1;
+			return (1);
+		}
 		my_strcpy(alias, temp->name);
 		my_strcat(alias, "=");
 		my_strcat(alias, temp->value);
@@ -92,6 +97,7 @@ int print_all_alias(sh_data *shell)
 		temp = temp->next;
 	}
 
+	shell->status = 0;
 	return (0);
 }
 
@@ -110,8 +116,9 @@ int print_alias(sh_data *shell, char *arg)
 
 	if (!temp)
 	{
-		write(STDOUT_FILENO, "No aliases found\n", 17);
-		return (0);
+		write(STDERR_FILENO, "No aliases found\n", 17);
+		shell->status = 1;
+		return (1);
 	}
 	while (temp)
 	{
@@ -121,7 +128,10 @@ int print_alias(sh_data *shell, char *arg)
 			len2 = my_strlen(temp->value);
 			alias = malloc(sizeof(char) * (len1 + len2 + 2));
 			if (!alias)
-				return (-1);
+			{
+				shell->status = 1;
+				return (1);
+			}
 			my_strcpy(alias, temp->name);
 			my_strcat(alias, "=");
 			my_strcat(alias, temp->value);
@@ -133,6 +143,7 @@ int print_alias(sh_data *shell, char *arg)
 		temp = temp->next;
 	}
 
+	shell->status = 0;
 	return (0);
 }
 
