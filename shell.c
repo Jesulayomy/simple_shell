@@ -2,9 +2,9 @@
 
 /**
  * get_func - returns functions for builtin commands
- * @arr: the line splitted into commands
+ * @arr: the line splitted into command and args
  *
- * Return: the function that prints the builtin
+ * Return: the function that prints the builtin command
  */
 int (*get_func(char **arr))(sh_data *)
 {
@@ -25,13 +25,9 @@ int (*get_func(char **arr))(sh_data *)
 		while (sh[i].func != NULL)
 		{
 			if (my_strcmp(sh[i].str, arr[0]) == 0)
-			{
 				return (sh[i].func);
-			}
 			else
-			{
 				i++;
-			}
 		}
 	}
 
@@ -50,7 +46,7 @@ void loop_shell(sh_data *shell)
 
 	for (; ;)
 	{
-		printf("($) ");
+		write(STDIN_FILENO, "($) ", 4);
 		fflush(stdout);
 		path = check_shell(shell);
 		if (!path)
@@ -62,11 +58,11 @@ void loop_shell(sh_data *shell)
 			shell->status = execve(path, shell->arr, shell->_environ);
 			if (shell->status == -1)
 			{
-				write(STDERR_FILENO, ": Permission denied\n", 20);
-				free_arr2(shell->arr);
-				free(shell->line);
-				free(path);
-				exit(98);
+			write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
+			write(STDERR_FILENO, ": Permission denied\n", 20);
+			free(path);
+			shell->status = 13;
+			my_exit(shell);
 			}
 		}
 		else
@@ -81,8 +77,8 @@ void loop_shell(sh_data *shell)
 }
 
 /**
- * check_shell - checks the shell commands, paths and builtin
- * @shell: pointer to shell structure
+ * check_shell - checks the shell commands, paths and builtins
+ * @shell: pointer to shell data structure
  *
  * Return: path or NULL
  */
@@ -97,21 +93,23 @@ char *check_shell(sh_data *shell)
 		free(shell->line);
 		return (NULL);
 	}
-
 	check_alias(shell);
 	expand_var(shell);
-
 	built_in_func = get_func(shell->arr);
+
 	if (built_in_func != NULL)
 	{
-		built_in_func(shell);
+		shell->status = built_in_func(shell);
 		free_arr2(shell->arr);
 		return (NULL);
 	}
 	path = search_path(shell->path, shell->arr[0]);
+
 	if (!path)
 	{
-		printf("%s: No such file or directory\n", shell->av[0]);
+		write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
+		write(STDERR_FILENO, ": No such file or directory\n", 28);
+		shell->status = 2;
 		free_arr2(shell->arr);
 		free(path);
 		return (NULL);
@@ -155,13 +153,18 @@ void expand_var(sh_data *shell)
 			str[k] = '\0';
 
 			value = _getenv(shell, str);
-
-			free(shell->arr[i]);
-			free(str);
-
-			shell->arr[i] = my_strdup(value);
-
-			free(value);
+			if (value == NULL)
+			{
+				free(value);
+				free(str);
+			}
+			else
+			{
+				free(shell->arr[i]);
+				free(str);
+				shell->arr[i] = my_strdup(value);
+				free(value);
+			}
 		}
 	}
 }
@@ -186,7 +189,6 @@ int main(int ac, char *av[], char *env[])
 	shell.status = 0;
 	shell.arr = NULL;
 	shell.av = av;
-	shell.path = path_to_list(env);
 	shell.alias = NULL;
 
 	for (i = 0; env[i]; i++)
@@ -196,6 +198,8 @@ int main(int ac, char *av[], char *env[])
 	for (i = 0; env[i]; i++)
 		shell._environ[i] = my_strdup(env[i]);
 	shell._environ[i] = NULL;
+
+	shell.path = path_to_list(&shell);
 
 	(void) ac;
 

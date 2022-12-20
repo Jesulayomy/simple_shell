@@ -1,8 +1,8 @@
 #include "shell.h"
 
 /**
- * my_cd - exits the shell
- * @shell: shell data
+ * my_cd - changes the working directory of the shell
+ * @shell: shell data struct
  *
  * Return: an exit value
  */
@@ -26,21 +26,22 @@ int my_cd(sh_data *shell)
 		shell->arr[1] = _getenv(shell, "OLDPWD");
 		n++;
 	}
-
 	m = chdir(shell->arr[1]);
 	if (m == -1)
 	{
-		write(STDERR_FILENO, "No such file or directory\n", 27);
-		return (0);
+		write(STDERR_FILENO, shell->arr[0], 2);
+		write(STDERR_FILENO, ": ", 2);
+		write(STDERR_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
+		write(STDERR_FILENO, ": No such file or directory\n", 28);
+		free(old_pwd);
+		return (2);
 	}
 	if (n == 1)
 	{
 		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
 		write(STDOUT_FILENO, "\n", 1);
 	}
-
 	new_pwd = getcwd(NULL, 1024);
-
 	mod_dir(shell, "new", new_pwd);
 	mod_dir(shell, "old", old_pwd);
 
@@ -53,14 +54,17 @@ int my_cd(sh_data *shell)
  * my_exit - exits the shell
  * @shell: shell data
  *
- * Return: an exit value
+ * Return: exits with the status of shell, or 0 if none is specified
  */
 int my_exit(sh_data *shell)
 {
-	int status = 0;
+	int ex_it = shell->status;
 
 	if (shell->arr[1])
-		status = my_atoi(shell->arr[1]);
+	{
+		shell->status = my_atoi(shell->arr[1]);
+		ex_it = shell->status;
+	}
 
 	free_list(shell->path);
 	if (shell->alias)
@@ -68,11 +72,12 @@ int my_exit(sh_data *shell)
 	free_arr2(shell->_environ);
 	free_arr2(shell->arr);
 	free(shell->line);
-	exit(status);
+
+	exit(ex_it);
 }
 
 /**
- * my_env - prints the environment
+ * my_env - prints the environment variables
  * @shell: shell data
  *
  * Return: 0
@@ -95,7 +100,7 @@ int my_env(sh_data *shell)
  * my_set - adds or modifies an environment variable
  * @shell: shell data
  *
- * Return: 0 on completion or -1 otherwise
+ * Return: 0 on completion or 12 if memory cannot be allocated
  */
 int my_set(sh_data *shell)
 {
@@ -106,7 +111,7 @@ int my_set(sh_data *shell)
 		;
 	new_env = malloc(sizeof(char *) * (i + 2));
 	if (!new_env)
-		return (-1);
+		return (12);
 	for (i = 0; shell->_environ[i]; i++)
 	{
 		j = 0, check = 0;
@@ -155,7 +160,7 @@ int my_unset(sh_data *shell)
 		;
 	new_env = malloc(sizeof(char *) * (i + 1));
 	if (!new_env)
-		return (-1);
+		return (12);
 
 	for (i = 0; shell->_environ[i]; i++)
 	{
@@ -174,14 +179,13 @@ int my_unset(sh_data *shell)
 		new_env[k] = my_strdup(shell->_environ[i]);
 		k++;
 	}
-
 	new_env[k] = NULL;
 
 	if (done == 0)
 	{
 		perror("Environment variable does not exist\n");
 		free_arr2(new_env);
-		return (-1);
+		return (6);
 	}
 
 	free_arr2(shell->_environ);

@@ -1,9 +1,9 @@
 #include "shell.h"
 
 /**
- * add_node_end - adds a new node at the end of the list_t list
- * @head: pointer to list
- * @str: string to add
+ * add_node_end - adds a new node at the end of the path_l linked list
+ * @head: pointer to the list
+ * @str: string to add to the end of the list
  *
  * Return: address of new list
  */
@@ -39,30 +39,30 @@ path_l *add_node_end(path_l **head, char *str)
  * environment variable
  * @environ: the environment
  *
- * Return: void
+ * Return: a linked list containing the PATH's paths
  */
-path_l *path_to_list(char **environ)
+path_l *path_to_list(sh_data *shell)
 {
 	char path[5] = "PATH";
 	int i, j, k, check;
 	path_l *head = NULL;
 	char *str;
 
-	for (i = 0; environ[i]; i++)
+	for (i = 0; shell->_environ[i]; i++)
 	{
 		j = 0, check = 0;
-		while (environ[i][j] != '=' && path[j] != '\0')
+		while (shell->_environ[i][j] != '=' && path[j] != '\0')
 		{
-			if (environ[i][j] != path[j])
+			if (shell->_environ[i][j] != path[j])
 				check = 1;
 			j++;
 		} k = 0;
 		if (check == 0)
 		{
 			j++;
-			while (environ[i][j])
+			while (shell->_environ[i][j])
 			{
-				if (environ[i][j] == ':')
+				if (shell->_environ[i][j] == ':')
 				{
 					str[k] = '\0', k = 0;
 					add_node_end(&head, str);
@@ -73,7 +73,7 @@ path_l *path_to_list(char **environ)
 				{
 					if (k == 0)
 						str = malloc(sizeof(char) * 150);
-					str[k] = environ[i][j], k++;
+					str[k] = shell->_environ[i][j], k++;
 				} j++;
 			}
 			str[k] = '\0';
@@ -82,6 +82,10 @@ path_l *path_to_list(char **environ)
 			break;
 		}
 	}
+	str = _getenv(shell, "PWD");
+	add_node_end(&head, str);
+	free(str);
+
 	return (head);
 }
 
@@ -120,29 +124,4 @@ char *search_path(path_l *list, char *file)
 	}
 
 	return (NULL);
-}
-
-/**
- * free_list - frees the path_l linked list
- * @head: pointer to the list
- *
- * Return: non
- */
-void free_list(path_l *head)
-{
-	path_l *temp = head, *second;
-
-	if (head)
-	{
-		while (temp->next)
-		{
-			second = temp;
-			temp = temp->next;
-			free(second->str);
-			free(second);
-		}
-
-		free(temp->str);
-		free(temp);
-	}
 }

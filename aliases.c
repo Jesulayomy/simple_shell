@@ -1,18 +1,18 @@
 #include "shell.h"
 
 /**
- * my_alias - works with aliases
- * @shell: pointer to shell structure
+ * my_alias - handles the alias builtin, sets and prints
+ * @shell: pointer to the shell structure
  *
- * Return: 0 on success
+ * Return: 0 on success or appropriate err
  */
 int my_alias(sh_data *shell)
 {
-	int i, j, check;
+	int i, j, check, ret = 0;
 
 	if (!shell->arr[1])
 	{
-		print_all_alias(shell);
+		ret = print_all_alias(shell);
 	}
 	else
 	{
@@ -24,22 +24,22 @@ int my_alias(sh_data *shell)
 				if (shell->arr[i][j] == '=')
 				{
 					check = 1;
-					set_alias(shell, shell->arr[i]);
+					ret = set_alias(shell, shell->arr[i]);
 					break;
 				}
 			}
 			if (check == 0)
-				print_alias(shell, shell->arr[i]);
+				ret = print_alias(shell, shell->arr[i]);
 		}
 	}
 
-	return (0);
+	return (ret);
 }
 
 /**
- * set_alias - create an alias
+ * set_alias - creates an alias
  * @shell: pointer to shell structure
- * @arg: the name to create alias for
+ * @arg: of the format: name=value
  *
  * Return: 0 on success
  */
@@ -52,17 +52,22 @@ int set_alias(sh_data *shell, char *arg)
 	value = my_strtok(NULL, "");
 
 	add_alias(&shell->alias, name, value);
-	free(str);
-	shell->status = 0;
+	if (shell->alias == NULL)
+	{
+		write(STDERR_FILENO, "Unable to add alias\n", 20);
+		free(str);
+		return (12);
+	}
 
+	free(str);
 	return (0);
 }
 
 /**
- * print_all_alias - print all aliases
+ * print_all_alias - print all aliases set in the current session
  * @shell: pointer to shell structure
  *
- * Return: 0 on success
+ * Return: 0 on success or 61 if no data is found
  */
 int print_all_alias(sh_data *shell)
 {
@@ -73,8 +78,7 @@ int print_all_alias(sh_data *shell)
 	if (!temp)
 	{
 		write(STDERR_FILENO, "No aliases found\n", 17);
-		shell->status = 1;
-		return (1);
+		return (61);
 	}
 	while (temp)
 	{
@@ -82,10 +86,8 @@ int print_all_alias(sh_data *shell)
 		len2 = my_strlen(temp->value);
 		alias = malloc(sizeof(char) * (len1 + len2 + 2));
 		if (!alias)
-		{
-			shell->status = 1;
-			return (1);
-		}
+			return (12);
+
 		my_strcpy(alias, temp->name);
 		my_strcat(alias, "=");
 		my_strcat(alias, temp->value);
@@ -97,14 +99,13 @@ int print_all_alias(sh_data *shell)
 		temp = temp->next;
 	}
 
-	shell->status = 0;
 	return (0);
 }
 
 /**
- * print_alias - prints a particular alias
+ * print_alias - prints a specific alias
  * @shell: pointer to shell structure
- * @arg: name of alias to print
+ * @arg: name of alias to print in the form: name
  *
  * Return: 0 on success
  */
@@ -117,8 +118,7 @@ int print_alias(sh_data *shell, char *arg)
 	if (!temp)
 	{
 		write(STDERR_FILENO, "No aliases found\n", 17);
-		shell->status = 1;
-		return (1);
+		return (61);
 	}
 	while (temp)
 	{
@@ -128,10 +128,8 @@ int print_alias(sh_data *shell, char *arg)
 			len2 = my_strlen(temp->value);
 			alias = malloc(sizeof(char) * (len1 + len2 + 2));
 			if (!alias)
-			{
-				shell->status = 1;
-				return (1);
-			}
+				return (12);
+
 			my_strcpy(alias, temp->name);
 			my_strcat(alias, "=");
 			my_strcat(alias, temp->value);
@@ -143,17 +141,16 @@ int print_alias(sh_data *shell, char *arg)
 		temp = temp->next;
 	}
 
-	shell->status = 0;
 	return (0);
 }
 
 /**
  * add_alias - adds a new node at the end of the alias_l list
- * @head: pointer to list
- * @name: name of alias
- * @value: value od alias
+ * @head: pointer to alias list
+ * @name: name of the alias
+ * @value: value of the alias
  *
- * Return: address of new list
+ * Return: address of resulting list
  */
 alias_l *add_alias(alias_l **head, char *name, char *value)
 {
