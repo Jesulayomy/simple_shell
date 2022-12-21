@@ -9,8 +9,7 @@
 int my_cd(sh_data *shell)
 {
 	int m, n = 0;
-	char *new_pwd;
-	char *old_pwd = _getenv(shell, "PWD");
+	char *new_pwd, *old_pwd = _getenv(shell, "PWD");
 
 	if (shell->arr[1] == NULL)
 	{
@@ -29,6 +28,8 @@ int my_cd(sh_data *shell)
 	m = chdir(shell->arr[1]);
 	if (m == -1)
 	{
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": ", 2);
 		write(STDERR_FILENO, shell->arr[0], 2);
 		write(STDERR_FILENO, ": ", 2);
 		write(STDERR_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
@@ -44,7 +45,6 @@ int my_cd(sh_data *shell)
 	new_pwd = getcwd(NULL, 1024);
 	mod_dir(shell, "new", new_pwd);
 	mod_dir(shell, "old", old_pwd);
-
 	free(new_pwd);
 	free(old_pwd);
 	return (0);
@@ -69,6 +69,7 @@ int my_exit(sh_data *shell)
 	free_list(shell->path);
 	if (shell->alias)
 		free_aliases(shell->alias);
+	free(shell->av);
 	free_arr2(shell->_environ);
 	free_arr2(shell->arr);
 	free(shell->line);
@@ -104,17 +105,22 @@ int my_env(sh_data *shell)
  */
 int my_set(sh_data *shell)
 {
-	int i, j, k = 0, check, done = 0;
+	int i, j = 0, k = 0, check = 0, done = 0;
 	char **new_env;
 
 	for (i = 0; shell->_environ[i]; i++)
 		;
+	if (!shell->arr[1] || !shell->arr[2])
+	{
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": Usage: setenv VARIABLE VALUE\n", 31);
+		return (1);
+	}
 	new_env = malloc(sizeof(char *) * (i + 2));
 	if (!new_env)
 		return (12);
-	for (i = 0; shell->_environ[i]; i++)
+	for (i = 0; shell->_environ[i]; i++, j = 0, check = 0)
 	{
-		j = 0, check = 0;
 		while (shell->_environ[i][j] != '=' && shell->arr[1][j] != '\0')
 		{
 			if (shell->_environ[i][j] != shell->arr[1][j])
@@ -126,10 +132,8 @@ int my_set(sh_data *shell)
 			new_env[k] = mod_env(shell);
 			k++, done = 1;
 			continue;
-
-		}
+		} k++;
 		new_env[k] = my_strdup(shell->_environ[i]);
-		k++;
 	}
 	if (done == 0)
 	{
@@ -137,9 +141,7 @@ int my_set(sh_data *shell)
 		new_env[k + 1] = NULL;
 	}
 	else
-	{
 		new_env[k] = NULL;
-	}
 	free_arr2(shell->_environ);
 	shell->_environ = new_env;
 	return (0);
@@ -158,10 +160,15 @@ int my_unset(sh_data *shell)
 
 	for (i = 0; shell->_environ[i]; i++)
 		;
+	if (!shell->arr[1])
+	{
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": Usage: unsetenv VARIABLE\n", 27);
+		return (1);
+	}
 	new_env = malloc(sizeof(char *) * (i + 1));
 	if (!new_env)
 		return (12);
-
 	for (i = 0; shell->_environ[i]; i++)
 	{
 		j = 0, check = 0;
@@ -175,21 +182,17 @@ int my_unset(sh_data *shell)
 		{
 			done = 1;
 			continue;
-		}
+		} k++;
 		new_env[k] = my_strdup(shell->_environ[i]);
-		k++;
 	}
 	new_env[k] = NULL;
-
 	if (done == 0)
 	{
 		perror("Environment variable does not exist\n");
 		free_arr2(new_env);
 		return (6);
 	}
-
 	free_arr2(shell->_environ);
 	shell->_environ = new_env;
-
 	return (0);
 }

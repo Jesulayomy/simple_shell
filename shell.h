@@ -61,7 +61,7 @@ typedef struct data
 	alias_l *alias;
 	char **_environ;
 	char **arr;
-	char **av;
+	char *av;
 	char *line;
 	int status;
 	path_l *path;

@@ -25,7 +25,9 @@ int (*get_func(char **arr))(sh_data *)
 		while (sh[i].func != NULL)
 		{
 			if (my_strcmp(sh[i].str, arr[0]) == 0)
+			{
 				return (sh[i].func);
+			}
 			else
 				i++;
 		}
@@ -46,7 +48,7 @@ void loop_shell(sh_data *shell)
 
 	for (; ;)
 	{
-		write(STDIN_FILENO, "($) ", 4);
+		write(STDOUT_FILENO, "($) ", 4);
 		fflush(stdout);
 		path = check_shell(shell);
 		if (!path)
@@ -58,6 +60,8 @@ void loop_shell(sh_data *shell)
 			shell->status = execve(path, shell->arr, shell->_environ);
 			if (shell->status == -1)
 			{
+			write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+			write(STDERR_FILENO, ": ", 2);
 			write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
 			write(STDERR_FILENO, ": Permission denied\n", 20);
 			free(path);
@@ -67,8 +71,8 @@ void loop_shell(sh_data *shell)
 		}
 		else
 		{
-			shell->status = 0;
-			wait(NULL);
+			wait(&shell->status);
+			shell->status = WEXITSTATUS(shell->status);
 		}
 
 		free_arr2(shell->arr);
@@ -107,6 +111,8 @@ char *check_shell(sh_data *shell)
 
 	if (!path)
 	{
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": ", 2);
 		write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
 		write(STDERR_FILENO, ": No such file or directory\n", 28);
 		shell->status = 2;
@@ -182,15 +188,15 @@ int main(int ac, char *av[], char *env[])
 	sh_data shell;
 	int i;
 
-
 	shell.line = NULL;
 	shell.length = 0;
 	shell.pid = getpid();
 	shell.status = 0;
 	shell.arr = NULL;
-	shell.av = av;
+	shell.av = my_strdup(av[0]);
 	shell.alias = NULL;
 
+	/* count th enumber of env strings to malloc a copy */
 	for (i = 0; env[i]; i++)
 		;
 

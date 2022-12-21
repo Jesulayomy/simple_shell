@@ -37,7 +37,7 @@ path_l *add_node_end(path_l **head, char *str)
 /**
  * path_to_list - creates a linked list of each directory contained in the PATH
  * environment variable
- * @environ: the environment
+ * @shell: the shell environment's struct
  *
  * Return: a linked list containing the PATH's paths
  */
@@ -67,7 +67,6 @@ path_l *path_to_list(sh_data *shell)
 					str[k] = '\0', k = 0;
 					add_node_end(&head, str);
 					free(str);
-
 				}
 				else
 				{
@@ -75,17 +74,14 @@ path_l *path_to_list(sh_data *shell)
 						str = malloc(sizeof(char) * 150);
 					str[k] = shell->_environ[i][j], k++;
 				} j++;
-			}
-			str[k] = '\0';
+			} str[k] = '\0';
 			add_node_end(&head, str);
 			free(str);
 			break;
 		}
-	}
-	str = _getenv(shell, "PWD");
+	} str = _getenv(shell, "PWD");
 	add_node_end(&head, str);
 	free(str);
-
 	return (head);
 }
 
@@ -109,8 +105,13 @@ char *search_path(path_l *list, char *file)
 		if (file[0] == '/')
 		{
 			free(path);
-			path = my_strdup(file);
-			return (path);
+			if (stat(file, &s) == 0)
+			{
+				path = my_strdup(file);
+				return (path);
+			}
+			else
+				return (NULL);
 		}
 
 		my_strcpy(path, temp->str);

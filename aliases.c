@@ -54,7 +54,8 @@ int set_alias(sh_data *shell, char *arg)
 	add_alias(&shell->alias, name, value);
 	if (shell->alias == NULL)
 	{
-		write(STDERR_FILENO, "Unable to add alias\n", 20);
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": Unable to add alias\n", 22);
 		free(str);
 		return (12);
 	}
@@ -77,7 +78,8 @@ int print_all_alias(sh_data *shell)
 
 	if (!temp)
 	{
-		write(STDERR_FILENO, "No aliases found\n", 17);
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": No aliases found\n", 19);
 		return (61);
 	}
 	while (temp)
@@ -117,7 +119,8 @@ int print_alias(sh_data *shell, char *arg)
 
 	if (!temp)
 	{
-		write(STDERR_FILENO, "No aliases found\n", 17);
+		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, ": No aliases found\n", 19);
 		return (61);
 	}
 	while (temp)
