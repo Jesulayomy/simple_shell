@@ -91,7 +91,6 @@ void loop_shell(sh_data *shell)
 			path = check_shell(shell);
 			if (!path)
 				continue;
-
 			shell->pid = fork();
 			if (shell->pid == 0)
 			{

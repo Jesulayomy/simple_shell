@@ -90,6 +90,7 @@ void loop_shell(sh_data *);
 void non_interact(sh_data *);
 int rm_comments(char **);
 void expand_var(sh_data *);
+int cd_err(sh_data *, int);
 
 /* Aliases */
 alias_l *add_alias(alias_l **, char *, char *);

@@ -30,11 +30,9 @@ void expand_var(sh_data *shell)
 		else if (shell->arr[i][0] == '$')
 		{
 			str = malloc(sizeof(char) * my_strlen(shell->arr[i]));
-
 			for (j = 1, k = 0; shell->arr[i][j]; j++, k++)
 				str[k] = shell->arr[i][j];
 			str[k] = '\0';
-
 			value = _getenv(shell, str);
 			if (value == NULL)
 			{

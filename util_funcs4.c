@@ -74,3 +74,40 @@ void mod_dir(sh_data *shell, char *dir, char *newdir)
 
 	my_set(shell);
 }
+
+/**
+ * cd_err - prints an error
+ * @shell: shell data
+ * @n: the error number, from cd, set and unset | 1, 2, 3 respectively
+ *
+ * Return: nothing
+ */
+int cd_err(sh_data *shell, int n)
+{
+	if (n == 1)
+	{
+		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+		write(STDERR_FILENO, ": ", 2);
+		write(STDERR_FILENO, shell->arr[0], 2);
+		write(STDERR_FILENO, ": ", 2);
+		write(STDERR_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
+		write(STDERR_FILENO, ": No such file or directory\n", 28);
+		return (1);
+	}
+
+	if (n == 2)
+	{
+		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+		write(STDERR_FILENO, ": Usage: setenv VARIABLE VALUE\n", 31);
+		return (1);
+	}
+
+	if (n == 3)
+	{
+		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+		write(STDERR_FILENO, ": Usage: unsetenv VARIABLE\n", 27);
+		return (1);
+	}
+
+	return (1);
+}
