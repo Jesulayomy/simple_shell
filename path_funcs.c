@@ -1,6 +1,58 @@
 #include "shell.h"
 
 /**
+ * expand_var - expands a variable to its corresponding value
+ * @shell: pointer to shell structure
+ *
+ * Return: void
+ */
+void expand_var(sh_data *shell)
+{
+	int i, j, k;
+	char *str, *value;
+
+	for (i = 0; shell->arr[i]; i++)
+	{
+		if (my_strcmp(shell->arr[i], "$$") == 0)
+		{
+			free(shell->arr[i]);
+			str = my_itoa(shell->pid);
+			shell->arr[i] = my_strdup(str);
+			free(str);
+		}
+		else if (my_strcmp(shell->arr[i], "$?") == 0)
+		{
+			free(shell->arr[i]);
+			str = my_itoa(shell->status);
+			shell->arr[i] = my_strdup(str);
+			free(str);
+		}
+		else if (shell->arr[i][0] == '$')
+		{
+			str = malloc(sizeof(char) * my_strlen(shell->arr[i]));
+
+			for (j = 1, k = 0; shell->arr[i][j]; j++, k++)
+				str[k] = shell->arr[i][j];
+			str[k] = '\0';
+
+			value = _getenv(shell, str);
+			if (value == NULL)
+			{
+				free(value);
+				free(str);
+			}
+			else
+			{
+				free(shell->arr[i]);
+				free(str);
+				shell->arr[i] = my_strdup(value);
+				free(value);
+			}
+		}
+	}
+}
+
+/**
  * add_node_end - adds a new node at the end of the path_l linked list
  * @head: pointer to the list
  * @str: string to add to the end of the list

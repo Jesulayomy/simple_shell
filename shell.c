@@ -37,6 +37,37 @@ int (*get_func(char **arr))(sh_data *)
 }
 
 /**
+ * non_interact - runs the shell in non interactive mode
+ * @shell: the shell data struct
+ *
+ * Return: non, uses exit with a status
+ */
+void non_interact(sh_data *shell)
+{
+	char *path;
+
+	path = check_shell(shell);
+	if (!path)
+		my_exit(shell);
+
+	shell->status = execve(path, shell->arr, shell->_environ);
+	if (shell->status == -1)
+	{
+		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+		write(STDERR_FILENO, ": ", 2);
+		write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
+		write(STDERR_FILENO, ": Permission denied\n", 20);
+		free(path);
+		shell->status = 13;
+		my_exit(shell);
+	}
+	shell->status = WEXITSTATUS(shell->status);
+	free_arr2(shell->arr);
+	free(path);
+	my_exit(shell);
+}
+
+/**
  * loop_shell - runs the shell continously
  * @shell: the shell data
  *
@@ -46,37 +77,44 @@ void loop_shell(sh_data *shell)
 {
 	char *path;
 
-	for (; ;)
+	if (shell->av[1])
 	{
-		write(STDOUT_FILENO, "($) ", 4);
-		fflush(stdout);
-		path = check_shell(shell);
-		if (!path)
-			continue;
-
-		shell->pid = fork();
-		if (shell->pid == 0)
+	}
+	else if (!isatty(STDIN_FILENO))
+		non_interact(shell);
+	else
+	{
+		for (; ;)
 		{
-			shell->status = execve(path, shell->arr, shell->_environ);
-			if (shell->status == -1)
+			write(STDOUT_FILENO, "($) ", 4);
+			fflush(stdout);
+			path = check_shell(shell);
+			if (!path)
+				continue;
+
+			shell->pid = fork();
+			if (shell->pid == 0)
 			{
-			write(STDERR_FILENO, shell->av, my_strlen(shell->av));
-			write(STDERR_FILENO, ": ", 2);
-			write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
-			write(STDERR_FILENO, ": Permission denied\n", 20);
-			free(path);
-			shell->status = 13;
-			my_exit(shell);
+				shell->status = execve(path, shell->arr, shell->_environ);
+				if (shell->status == -1)
+				{
+					write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+					write(STDERR_FILENO, ": ", 2);
+					write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
+					write(STDERR_FILENO, ": Permission denied\n", 20);
+					free(path);
+					shell->status = 13;
+					my_exit(shell);
+				}
 			}
+			else
+			{
+				wait(&shell->status);
+				shell->status = WEXITSTATUS(shell->status);
+			}
+			free_arr2(shell->arr);
+			free(path);
 		}
-		else
-		{
-			wait(&shell->status);
-			shell->status = WEXITSTATUS(shell->status);
-		}
-
-		free_arr2(shell->arr);
-		free(path);
 	}
 }
 
@@ -111,7 +149,7 @@ char *check_shell(sh_data *shell)
 
 	if (!path)
 	{
-		write(STDERR_FILENO, shell->av, my_strlen(shell->av));
+		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
 		write(STDERR_FILENO, ": ", 2);
 		write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
 		write(STDERR_FILENO, ": No such file or directory\n", 28);
@@ -121,58 +159,6 @@ char *check_shell(sh_data *shell)
 		return (NULL);
 	}
 	return (path);
-}
-
-/**
- * expand_var - expands a variable to its corresponding value
- * @shell: pointer to shell structure
- *
- * Return: void
- */
-void expand_var(sh_data *shell)
-{
-	int i, j, k;
-	char *str, *value;
-
-	for (i = 0; shell->arr[i]; i++)
-	{
-		if (my_strcmp(shell->arr[i], "$$") == 0)
-		{
-			free(shell->arr[i]);
-			str = my_itoa(shell->pid);
-			shell->arr[i] = my_strdup(str);
-			free(str);
-		}
-		else if (my_strcmp(shell->arr[i], "$?") == 0)
-		{
-			free(shell->arr[i]);
-			str = my_itoa(shell->status);
-			shell->arr[i] = my_strdup(str);
-			free(str);
-		}
-		else if (shell->arr[i][0] == '$')
-		{
-			str = malloc(sizeof(char) * my_strlen(shell->arr[i]));
-
-			for (j = 1, k = 0; shell->arr[i][j]; j++, k++)
-				str[k] = shell->arr[i][j];
-			str[k] = '\0';
-
-			value = _getenv(shell, str);
-			if (value == NULL)
-			{
-				free(value);
-				free(str);
-			}
-			else
-			{
-				free(shell->arr[i]);
-				free(str);
-				shell->arr[i] = my_strdup(value);
-				free(value);
-			}
-		}
-	}
 }
 
 /**
@@ -193,8 +179,12 @@ int main(int ac, char *av[], char *env[])
 	shell.pid = getpid();
 	shell.status = 0;
 	shell.arr = NULL;
-	shell.av = my_strdup(av[0]);
 	shell.alias = NULL;
+
+	shell.av = malloc(sizeof(char *) * (ac + 1));
+	for (i = 0; av[i]; i++)
+		shell.av[i] = my_strdup(av[0]);
+	shell.av[i] = NULL;
 
 	/* count th enumber of env strings to malloc a copy */
 	for (i = 0; env[i]; i++)
@@ -206,8 +196,6 @@ int main(int ac, char *av[], char *env[])
 	shell._environ[i] = NULL;
 
 	shell.path = path_to_list(&shell);
-
-	(void) ac;
 
 	loop_shell(&shell);
 

@@ -61,7 +61,7 @@ typedef struct data
 	alias_l *alias;
 	char **_environ;
 	char **arr;
-	char *av;
+	char **av;
 	char *line;
 	int status;
 	path_l *path;
@@ -86,6 +86,8 @@ char *check_shell(sh_data *);
 char *_getenv(sh_data *, char *);
 char *search_path(path_l *, char *);
 int (*get_func(char **))(sh_data *);
+void loop_shell(sh_data *);
+void non_interact(sh_data *);
 int rm_comments(char **);
 void expand_var(sh_data *);
 
