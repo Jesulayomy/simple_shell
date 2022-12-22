@@ -50,6 +50,7 @@ typedef struct alias
  * @alias: linked list of aliases created in the current shell session
  * @arr: an array containing each argument entered into the shell
  * @av: arguments vector
+ * @interact: returns 1 if it is an interactive shell, or 0 if not
  * @length: length of the line
  * @line: the entire line of commands
  * @path: linked list containing the PATH variable
@@ -63,6 +64,7 @@ typedef struct data
 	char **arr;
 	char **av;
 	char *line;
+	int interact;
 	int status;
 	path_l *path;
 	pid_t pid;
@@ -81,7 +83,7 @@ typedef struct built_in
 } built_in;
 
 /* Major stakeholders */
-char **get_commands(char *, size_t);
+char **get_commands(sh_data *, char *, size_t);
 char *check_shell(sh_data *);
 char *_getenv(sh_data *, char *);
 char *search_path(path_l *, char *);

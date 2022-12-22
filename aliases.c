@@ -76,11 +76,13 @@ int print_all_alias(sh_data *shell)
 	char *alias;
 	int len1, len2;
 
+	/**
+	 * write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+	 * write(STDERR_FILENO, ": No aliases found\n", 19);
+	 */
 	if (!temp)
 	{
-		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
-		write(STDERR_FILENO, ": No aliases found\n", 19);
-		return (61);
+		return (0);
 	}
 	while (temp)
 	{
@@ -120,8 +122,10 @@ int print_alias(sh_data *shell, char *arg)
 	if (!temp)
 	{
 		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
-		write(STDERR_FILENO, ": No aliases found\n", 19);
-		return (61);
+		write(STDERR_FILENO, ": ", 2);
+		write(STDERR_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
+		write(STDERR_FILENO, " not found\n", 11);
+		return (1);
 	}
 	while (temp)
 	{

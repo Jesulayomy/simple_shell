@@ -7,7 +7,7 @@
  *
  * Return: an array of split tokens of commands to **shell.arr
  */
-char **get_commands(char *buffer, size_t n)
+char **get_commands(sh_data *shell, char *buffer, size_t n)
 {
 	char **arr = NULL;
 	char *token;
@@ -18,20 +18,21 @@ char **get_commands(char *buffer, size_t n)
 	if (r == -1)
 	{
 		free(buffer);
+		shell->interact = 3;
 		return (arr);
 	}
 	r = rm_comments(&buffer);
 	if (r == 0)
 		return (NULL);
-for (i = 0; i < r; i++)
-{
-	if (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\t' ||
-			buffer[i] == '\r' || buffer[i] == '\a')
+	for (i = 0; i < r; i++)
 	{
-		k++;
-	}
-	else
-		continue;
+		if (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\t' ||
+				buffer[i] == '\r' || buffer[i] == '\a')
+		{
+			k++;
+		}
+		else
+			continue;
 	}
 	arr = malloc(sizeof(char *) * (k + 1));
 	token = my_strtok(buffer, DELIM_T);

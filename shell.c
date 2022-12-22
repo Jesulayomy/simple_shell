@@ -46,6 +46,7 @@ void non_interact(sh_data *shell)
 {
 	char *path;
 
+	shell->interact = 0;
 	path = check_shell(shell);
 	if (!path)
 		my_exit(shell);
@@ -128,7 +129,7 @@ char *check_shell(sh_data *shell)
 	int (*built_in_func)(sh_data *sh);
 	char *path;
 
-	shell->arr = get_commands(shell->line, shell->length);
+	shell->arr = get_commands(shell, shell->line, shell->length);
 	if (!shell->arr)
 	{
 		free(shell->line);
@@ -175,6 +176,7 @@ int main(int ac, char *av[], char *env[])
 
 	shell.line = NULL;
 	shell.length = 0;
+	shell.interact = 1;
 	shell.pid = getpid();
 	shell.status = 0;
 	shell.arr = NULL;

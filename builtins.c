@@ -25,12 +25,21 @@ int my_cd(sh_data *shell)
 		shell->arr[1] = _getenv(shell, "OLDPWD");
 		n++;
 	}
-	m = chdir(shell->arr[1]);
-	if (m == -1)
+	if (shell->arr[1] == NULL)
 	{
-		cd_err(shell, 1);
-		free(old_pwd);
-		return (2);
+		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
+		write(STDOUT_FILENO, ": OLDPWD not set\n", 17);
+		n = 0;
+	}
+	else
+	{
+		m = chdir(shell->arr[1]);
+		if (m == -1)
+		{
+			cd_err(shell, 1);
+			free(old_pwd);
+			return (2);
+		}
 	}
 	if (n == 1)
 	{
@@ -55,19 +64,24 @@ int my_exit(sh_data *shell)
 {
 	int ex_it = shell->status;
 
-	if (shell->arr[1])
+	if (shell->arr[1] && shell->interact == 1)
 	{
 		shell->status = my_atoi(shell->arr[1]);
 		ex_it = shell->status;
 	}
+	if (shell->path)
+		free_list(shell->path);
 
-	free_list(shell->path);
 	if (shell->alias)
 		free_aliases(shell->alias);
-	free_arr2(shell->av);
-	free_arr2(shell->_environ);
-	free_arr2(shell->arr);
-	free(shell->line);
+	if (shell->av)
+		free_arr2(shell->av);
+	if (shell->_environ)
+		free_arr2(shell->_environ);
+	if (shell->arr)
+		free_arr2(shell->arr);
+	if (shell->line)
+		free(shell->line);
 
 	exit(ex_it);
 }
