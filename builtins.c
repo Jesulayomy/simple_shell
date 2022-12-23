@@ -26,11 +26,7 @@ int my_cd(sh_data *shell)
 		n++;
 	}
 	if (shell->arr[1] == NULL)
-	{
-		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
-		write(STDOUT_FILENO, ": OLDPWD not set\n", 17);
-		n = 0;
-	}
+		n = cd_err(shell, 1);
 	else
 	{
 		m = chdir(shell->arr[1]);
@@ -45,8 +41,7 @@ int my_cd(sh_data *shell)
 	{
 		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
 		write(STDOUT_FILENO, "\n", 1);
-	}
-	new_pwd = getcwd(NULL, 1024);
+	} new_pwd = getcwd(NULL, 1024);
 	mod_dir(shell, "new", new_pwd);
 	mod_dir(shell, "old", old_pwd);
 	free(new_pwd);

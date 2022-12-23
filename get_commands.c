@@ -2,6 +2,7 @@
 
 /**
  * get_commands - gets a command from the standard input
+ * @shell: the shell data struct
  * @buffer: a buffer to store the line input by the user (*shell.line)
  * @n: size of buffer (shell.length)
  *

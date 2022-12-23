@@ -181,6 +181,7 @@ int main(int ac, char *av[], char *env[])
 	shell.status = 0;
 	shell.arr = NULL;
 	shell.alias = NULL;
+	(void) env;
 
 	shell.av = malloc(sizeof(char *) * (ac + 1));
 	for (i = 0; av[i]; i++)
@@ -188,12 +189,12 @@ int main(int ac, char *av[], char *env[])
 	shell.av[i] = NULL;
 
 	/* count th enumber of env strings to malloc a copy */
-	for (i = 0; env[i]; i++)
+	for (i = 0; environ[i]; i++)
 		;
 
 	shell._environ = malloc(sizeof(char *) * (i + 1));
-	for (i = 0; env[i]; i++)
-		shell._environ[i] = my_strdup(env[i]);
+	for (i = 0; environ[i]; i++)
+		shell._environ[i] = my_strdup(environ[i]);
 	shell._environ[i] = NULL;
 
 	shell.path = path_to_list(&shell);

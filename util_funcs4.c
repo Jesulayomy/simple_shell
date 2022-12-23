@@ -109,5 +109,12 @@ int cd_err(sh_data *shell, int n)
 		return (1);
 	}
 
+	if (n == 4)
+	{
+		write(STDOUT_FILENO, shell->arr[1], my_strlen(shell->arr[1]));
+		write(STDOUT_FILENO, ": OLDPWD not set\n", 17);
+		return (0);
+	}
+
 	return (1);
 }
