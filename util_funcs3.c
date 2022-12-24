@@ -36,9 +36,9 @@ void free_arr2(char **arr)
 
 	if (arr != NULL)
 	{
-	for (j = 0; arr[j] ; j++)
-		free(arr[j]);
-	free(arr);
+		for (j = 0; arr[j] ; j++)
+			free(arr[j]);
+		free(arr);
 	}
 }
 

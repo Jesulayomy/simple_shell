@@ -141,8 +141,10 @@ ssize_t my_getline(char **buffer, size_t *n, FILE *stream)
 	ssize_t r;
 	size_t size;
 
+	/*
 	if (input == 0)
 		fflush(stream);
+	*/
 
 	buf = malloc(sizeof(char) * BUFSIZE);
 	if (!buf)

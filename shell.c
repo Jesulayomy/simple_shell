@@ -47,25 +47,38 @@ void non_interact(sh_data *shell)
 	char *path;
 
 	shell->interact = 0;
-	path = check_shell(shell);
-	if (!path)
-		my_exit(shell);
-
-	shell->status = execve(path, shell->arr, shell->_environ);
-	if (shell->status == -1)
+	for (; ;)
 	{
-		write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
-		write(STDERR_FILENO, ": ", 2);
-		write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
-		write(STDERR_FILENO, ": Permission denied\n", 20);
+		path = check_shell(shell);
+		if (!path && shell->builtin == 0)
+			my_exit(shell);
+		else if (!path && shell->builtin == 1)
+			continue;
+
+		shell->builtin = 0;
+		shell->pid = fork();
+		if (shell->pid == 0)
+		{
+			shell->status = execve(path, shell->arr, shell->_environ);
+			if (shell->status == -1)
+			{
+				write(STDERR_FILENO, shell->av[0], my_strlen(shell->av[0]));
+				write(STDERR_FILENO, ": ", 2);
+				write(STDERR_FILENO, shell->arr[0], my_strlen(shell->arr[0]));
+				write(STDERR_FILENO, ": Permission denied\n", 20);
+				free(path);
+				shell->status = 13;
+				my_exit(shell);
+			}
+		}
+		else
+		{
+			wait(&shell->status);
+			shell->status = WEXITSTATUS(shell->status);
+		}
+		free_arr2(shell->arr);
 		free(path);
-		shell->status = 13;
-		my_exit(shell);
 	}
-	shell->status = WEXITSTATUS(shell->status);
-	free_arr2(shell->arr);
-	free(path);
-	my_exit(shell);
 }
 
 /**
@@ -79,8 +92,7 @@ void loop_shell(sh_data *shell)
 	char *path;
 
 	if (shell->av[1])
-	{
-	}
+		exit (98);
 	else if (!isatty(STDIN_FILENO))
 		non_interact(shell);
 	else
@@ -142,7 +154,9 @@ char *check_shell(sh_data *shell)
 	if (built_in_func != NULL)
 	{
 		shell->status = built_in_func(shell);
-		free_arr2(shell->arr);
+		if (shell->arr != NULL)
+			free_arr2(shell->arr);
+		shell->builtin = 1;
 		return (NULL);
 	}
 	path = search_path(shell->path, shell->arr[0]);
@@ -179,6 +193,7 @@ int main(int ac, char *av[], char *env[])
 	shell.interact = 1;
 	shell.pid = getpid();
 	shell.status = 0;
+	shell.builtin = 0;
 	shell.arr = NULL;
 	shell.alias = NULL;
 	(void) env;

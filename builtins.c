@@ -59,10 +59,13 @@ int my_exit(sh_data *shell)
 {
 	int ex_it = shell->status;
 
-	if (shell->arr[1] && shell->interact == 1)
+	if (shell->interact == 1)
 	{
-		shell->status = my_atoi(shell->arr[1]);
-		ex_it = shell->status;
+		if (!my_strcmp("exit", shell->arr[0]) && shell->arr[1])
+		{
+			shell->status = my_atoi(shell->arr[1]);
+			ex_it = shell->status;
+		}
 	}
 	if (shell->path)
 		free_list(shell->path);
@@ -73,7 +76,7 @@ int my_exit(sh_data *shell)
 		free_arr2(shell->av);
 	if (shell->_environ)
 		free_arr2(shell->_environ);
-	if (shell->arr)
+	if (shell->arr && shell->interact == 1)
 		free_arr2(shell->arr);
 	if (shell->line)
 		free(shell->line);
@@ -97,7 +100,6 @@ int my_env(sh_data *shell)
 		write(STDOUT_FILENO, shell->_environ[i], len);
 		write(STDOUT_FILENO, "\n", 1);
 	}
-
 	return (0);
 }
 

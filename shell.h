@@ -50,6 +50,7 @@ typedef struct alias
  * @alias: linked list of aliases created in the current shell session
  * @arr: an array containing each argument entered into the shell
  * @av: arguments vector
+ * @builtin: checks if the last command ran was a builtin command or not
  * @interact: returns 1 if it is an interactive shell, or 0 if not
  * @length: length of the line
  * @line: the entire line of commands
@@ -64,6 +65,7 @@ typedef struct data
 	char **arr;
 	char **av;
 	char *line;
+	int builtin;
 	int interact;
 	int status;
 	path_l *path;
